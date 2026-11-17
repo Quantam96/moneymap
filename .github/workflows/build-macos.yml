@@ -66,9 +66,10 @@ jobs:
       - name: Resolve package dependencies (GRDB.swift)
         run: |
           xcodebuild -resolvePackageDependencies -project "$PROJECT" -scheme "$SCHEME"
-          echo "--- Package.resolved ---"
-          test -f MoneyMap.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
-          cat MoneyMap.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+          echo "--- Package.resolved files found ---"
+          find . -name "Package.resolved" -print || true
+          echo "--- Files under MoneyMap.xcodeproj ---"
+          find MoneyMap.xcodeproj -type f -print || true
 
       - name: Build (Release, arm64, unsigned)
         run: |
