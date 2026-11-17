@@ -56,10 +56,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-spm-
 
-      - name: Generate app icons (PNGs are not committed via snapshot push)
-        run: |
-          ls -lh MoneyMap/Resources/Assets.xcassets/AppIcon.appiconset/
-
       - name: Resolve package dependencies (GRDB.swift)
         run: xcodebuild -resolvePackageDependencies -project "$PROJECT" -scheme "$SCHEME"
 
