@@ -32,7 +32,7 @@ jobs:
         run: |
           if ls moneymap-source.zip.b64.part-* 1> /dev/null 2>&1; then
             cat moneymap-source.zip.b64.part-* > moneymap-source.zip.b64
-            base64 -d moneymap-source.zip.b64 > /tmp/moneymap.zip
+            base64 -D moneymap-source.zip.b64 > /tmp/moneymap.zip
             unzip -o -q /tmp/moneymap.zip
             # Zip contains moneymap/ as top folder; move its contents to repo root
             cp -R moneymap/. .
