@@ -37,6 +37,13 @@ jobs:
             # Zip contains moneymap/ as top folder; move its contents to repo root
             cp -R moneymap/. .
             rm -rf moneymap /tmp/moneymap.zip
+            # Remove the top-level Package.swift: it declares the same
+            # MoneyMap target and GRDB dependency as the Xcode project, and
+            # Xcode then resolves packages for the Swift Package instead of
+            # the .xcodeproj, leaving the build with
+            # "Missing package product 'GRDB'". The .xcodeproj is the
+            # only build system used here.
+            rm -f Package.swift
             ls -la
             test -f MoneyMap.xcodeproj/project.pbxproj
           else
@@ -57,7 +64,11 @@ jobs:
             ${{ runner.os }}-spm-
 
       - name: Resolve package dependencies (GRDB.swift)
-        run: xcodebuild -resolvePackageDependencies -project "$PROJECT" -scheme "$SCHEME"
+        run: |
+          xcodebuild -resolvePackageDependencies -project "$PROJECT" -scheme "$SCHEME"
+          echo "--- Package.resolved ---"
+          test -f MoneyMap.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+          cat MoneyMap.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
       - name: Build (Release, arm64, unsigned)
         run: |
