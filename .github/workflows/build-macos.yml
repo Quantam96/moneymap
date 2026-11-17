@@ -55,27 +55,22 @@ jobs:
           xcodebuild -version
           swift --version
 
-      - name: Cache Swift Package Manager
-        uses: actions/cache@v4
-        with:
-          path: ~/Library/Caches/org.swift.swiftpm
-          key: ${{ runner.os }}-spm-${{ hashFiles('MoneyMap.xcodeproj/project.pbxproj') }}
-          restore-keys: |
-            ${{ runner.os }}-spm-
-
       - name: Resolve package dependencies (GRDB.swift)
         run: |
-          xcodebuild -resolvePackageDependencies -project "$PROJECT" -scheme "$SCHEME"
+          xcodebuild -resolvePackageDependencies -project "$PROJECT" -scheme "$SCHEME" -derivedDataPath "$PWD/build/DerivedData"
           echo "--- Package.resolved files found ---"
           find . -name "Package.resolved" -print || true
           echo "--- Files under MoneyMap.xcodeproj ---"
           find MoneyMap.xcodeproj -type f -print || true
+          echo "--- SourcePackages checkouts ---"
+          ls -R build/DerivedData/SourcePackages 2>/dev/null || echo "no SourcePackages dir yet"
 
       - name: Build (Release, arm64, unsigned)
         run: |
           xcodebuild build \
             -project "$PROJECT" -scheme "$SCHEME" \
             -destination "$DESTINATION" -configuration Release \
+            -derivedDataPath "$PWD/build/DerivedData" \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Test
@@ -85,6 +80,7 @@ jobs:
           xcodebuild test \
             -project "$PROJECT" -scheme "$SCHEME" \
             -destination "$DESTINATION" -configuration Debug \
+            -derivedDataPath "$PWD/build/DerivedData" \
             -resultBundlePath build/TestResults.xcresult \
             CODE_SIGNING_ALLOWED=NO
 
@@ -107,6 +103,7 @@ jobs:
           xcodebuild archive \
             -project "$PROJECT" -scheme "$SCHEME" \
             -destination "$DESTINATION" -configuration Release \
+            -derivedDataPath "$PWD/build/DerivedData" \
             -archivePath build/MoneyMap.xcarchive \
             CODE_SIGNING_ALLOWED=NO
           ditto build/MoneyMap.xcarchive/Products/Applications/MoneyMap.app build/MoneyMap.app
