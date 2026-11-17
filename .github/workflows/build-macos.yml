@@ -58,8 +58,6 @@ jobs:
 
       - name: Generate app icons (PNGs are not committed via snapshot push)
         run: |
-          python3 -m pip install --quiet Pillow
-          python3 MoneyMap/Scripts/generate_icons.py
           ls -lh MoneyMap/Resources/Assets.xcassets/AppIcon.appiconset/
 
       - name: Resolve package dependencies (GRDB.swift)
