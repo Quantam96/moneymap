@@ -34,8 +34,13 @@ jobs:
             cat moneymap-source.zip.b64.part-* > moneymap-source.zip.b64
             python3 -m base64 -d moneymap-source.zip.b64 > /tmp/moneymap.zip
             unzip -o -q /tmp/moneymap.zip
-            # Zip contains moneymap/ as top folder; move its contents to repo root
-            cp -R moneymap/. .
+            # Zip contains moneymap/ as top folder; move its contents to repo root.
+            # Use ditto (macOS-native) instead of cp -R: earlier runs showed
+            # files present in the zip (e.g. the AppIcon set, and now all 46
+            # Swift sources) missing on the runner after extraction, so copy
+            # explicitly and verify the sources are actually on disk.
+            ditto moneymap/MoneyMap MoneyMap
+            ditto moneymap/MoneyMap.xcodeproj MoneyMap.xcodeproj
             rm -rf moneymap /tmp/moneymap.zip
             # Remove the top-level Package.swift: it declares the same
             # MoneyMap target and GRDB dependency as the Xcode project, and
@@ -46,6 +51,11 @@ jobs:
             rm -f Package.swift
             ls -la
             test -f MoneyMap.xcodeproj/project.pbxproj
+            test -f MoneyMap/Models/Category.swift
+            test -f MoneyMap/Services/ReportService.swift
+            test -f MoneyMap/Database/GRDBRecords.swift
+            echo "Swift files on disk: $(find MoneyMap -name '*.swift' | wc -l)"
+            test "$(find MoneyMap -name '*.swift' | wc -l | tr -d ' ')" = "55"
           else
             echo "No source parts found, using files already in repo"
           fi
